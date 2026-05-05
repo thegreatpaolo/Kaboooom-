@@ -16,6 +16,7 @@ interface HomePageProps {
 export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [playerName, setPlayerName] = useState('');
+  const [roomCodeInput, setRoomCodeInput] = useState(''); // New state for Join Code
   const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy');
   const [minPlayers, setMinPlayers] = useState(2);
   const [maxPlayers, setMaxPlayers] = useState(8);
@@ -34,12 +35,16 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
     });
   };
 
+  const handleJoinClick = () => {
+    if (!playerName.trim()) return alert("Please enter your name first");
+    if (!roomCodeInput.trim()) return alert("Please enter a room code");
+    
+    // Call the parent function to join the specific room
+    onJoinRoom(playerName, roomCodeInput.toUpperCase());
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      {/* 
-        The negative margin 'mb-[-50px]' pulls the box up.
-        'z-10' ensures the logo explosion sits on top of the border.
-      */}
       <div className="mb-[-50px] z-10 transform hover:scale-105 transition-transform duration-300">
         <img 
           src={kaboomLogo} 
@@ -49,31 +54,35 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
       </div>
 
       <div className="relative w-full max-w-md rounded-3xl p-8 bg-black/40 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
+        {/* Name Input - Shared by both tabs */}
         <div className="mb-6">
           <label className="block text-sm text-white font-bold mb-2">Your Name</label>
           <input
             type="text"
+            placeholder="Enter nickname..."
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             className="w-full bg-white/10 border-2 border-white/30 rounded-2xl px-4 py-3 text-white outline-none focus:border-yellow-400"
           />
         </div>
 
+        {/* Tab Switcher */}
         <div className="flex gap-3 mb-6">
           <button 
             onClick={() => setActiveTab('create')} 
-            className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'create' ? 'bg-[#FFD700] text-black' : 'bg-white/10 text-white'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold transition-all ${activeTab === 'create' ? 'bg-[#FFD700] text-black scale-105' : 'bg-white/10 text-white opacity-60'}`}
           >
             Create Room
           </button>
           <button 
             onClick={() => setActiveTab('join')} 
-            className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'join' ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold transition-all ${activeTab === 'join' ? 'bg-[#39FF14] text-black scale-105' : 'bg-white/10 text-white opacity-60'}`}
           >
             Join Room
           </button>
         </div>
 
+        {/* Create Room Content */}
         {activeTab === 'create' && (
           <>
             <div className="mb-6">
@@ -95,29 +104,15 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm text-white font-bold mb-3">Min-Max Players (2-8)</label>
+              <label className="block text-sm text-white font-bold mb-3">Min-Max Players</label>
               <div className="flex gap-4">
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Min</span>
-                  <input 
-                    type="number" 
-                    min="2" 
-                    max="8" 
-                    value={minPlayers} 
-                    onChange={(e) => setMinPlayers(Number(e.target.value))} 
-                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" 
-                  />
+                  <input type="number" min="2" max="8" value={minPlayers} onChange={(e) => setMinPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
                 </div>
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Max</span>
-                  <input 
-                    type="number" 
-                    min="2" 
-                    max="8" 
-                    value={maxPlayers} 
-                    onChange={(e) => setMaxPlayers(Number(e.target.value))} 
-                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" 
-                  />
+                  <input type="number" min="2" max="8" value={maxPlayers} onChange={(e) => setMaxPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
                 </div>
               </div>
             </div>
@@ -129,6 +124,33 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
                Create a Room
             </button>
           </>
+        )}
+
+        {/* Join Room Content */}
+        {activeTab === 'join' && (
+          <div className="animate-in fade-in zoom-in duration-300">
+            <div className="mb-6">
+              <label className="block text-sm text-[#39FF14] font-bold mb-2">Enter Room Code</label>
+              <input
+                type="text"
+                maxLength={4}
+                placeholder="EX: A1B2"
+                value={roomCodeInput}
+                onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                className="w-full bg-white/10 border-2 border-[#39FF14]/50 rounded-2xl px-4 py-4 text-center text-3xl font-mono tracking-widest text-white outline-none focus:border-[#39FF14] shadow-[0_0_15px_rgba(57,255,20,0.2)]"
+              />
+            </div>
+            
+            <button 
+              onClick={handleJoinClick}
+              className="w-full bg-[#39FF14] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-green-700 active:transform active:scale-95 transition-transform"
+            >
+              Join Room
+            </button>
+            <p className="text-center text-xs text-white/40 mt-4 italic">
+              Ask your friend for the 4-character code!
+            </p>
+          </div>
         )}
       </div>
     </div>
