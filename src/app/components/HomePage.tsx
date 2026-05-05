@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import kaboomLogo from '../../assets/can_you_create_a_game_logo_for_kaboooom_-removebg-preview.png';
 
 interface HomePageProps {
   onCreateRoom: (settings: { 
@@ -35,9 +36,19 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <h1 className="text-7xl font-bold text-white mb-12">KABOOOOM!</h1>
+      {/* 
+        The negative margin 'mb-[-50px]' pulls the box up.
+        'z-10' ensures the logo explosion sits on top of the border.
+      */}
+      <div className="mb-[-50px] z-10 transform hover:scale-105 transition-transform duration-300">
+        <img 
+          src={kaboomLogo} 
+          alt="KABOOOOM! Logo" 
+          className="w-full max-w-[700px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
+        />
+      </div>
 
-      <div className="w-full max-w-md rounded-3xl p-8 bg-black/40 backdrop-blur-xl border-2 border-white/20">
+      <div className="relative w-full max-w-md rounded-3xl p-8 bg-black/40 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
         <div className="mb-6">
           <label className="block text-sm text-white font-bold mb-2">Your Name</label>
           <input
@@ -49,8 +60,18 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
         </div>
 
         <div className="flex gap-3 mb-6">
-          <button onClick={() => setActiveTab('create')} className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'create' ? 'bg-[#FFD700] text-black' : 'bg-white/10 text-white'}`}>Create Room</button>
-          <button onClick={() => setActiveTab('join')} className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'join' ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white'}`}>Join Room</button>
+          <button 
+            onClick={() => setActiveTab('create')} 
+            className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'create' ? 'bg-[#FFD700] text-black' : 'bg-white/10 text-white'}`}
+          >
+            Create Room
+          </button>
+          <button 
+            onClick={() => setActiveTab('join')} 
+            className={`flex-1 py-3 rounded-2xl font-bold ${activeTab === 'join' ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white'}`}
+          >
+            Join Room
+          </button>
         </div>
 
         {activeTab === 'create' && (
@@ -78,17 +99,34 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               <div className="flex gap-4">
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Min</span>
-                  <input type="number" min="2" max="8" value={minPlayers} onChange={(e) => setMinPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
+                  <input 
+                    type="number" 
+                    min="2" 
+                    max="8" 
+                    value={minPlayers} 
+                    onChange={(e) => setMinPlayers(Number(e.target.value))} 
+                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" 
+                  />
                 </div>
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Max</span>
-                  <input type="number" min="2" max="8" value={maxPlayers} onChange={(e) => setMaxPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
+                  <input 
+                    type="number" 
+                    min="2" 
+                    max="8" 
+                    value={maxPlayers} 
+                    onChange={(e) => setMaxPlayers(Number(e.target.value))} 
+                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" 
+                  />
                 </div>
               </div>
             </div>
 
-            <button onClick={handleCreateClick} className="w-full bg-[#FFD700] text-black py-4 rounded-3xl font-bold text-lg border-b-4 border-yellow-700">
-              🎮 Create a Room
+            <button 
+              onClick={handleCreateClick} 
+              className="w-full bg-[#FFD700] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-yellow-700 active:transform active:scale-95 transition-transform"
+            >
+               Create a Room
             </button>
           </>
         )}
