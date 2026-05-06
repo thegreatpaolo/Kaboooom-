@@ -16,6 +16,7 @@ class Room(models.Model):
     difficulty = models.CharField(max_length=4, choices=DIFFICULTY_CHOICES, default='easy')
     min_players = models.IntegerField(default=2)
     max_players = models.IntegerField(default=8)
+    bomb_timer = models.IntegerField(default=20)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 

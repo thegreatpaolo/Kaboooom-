@@ -82,9 +82,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         room = await self.get_room(self.room_code)
         if not room:
             return
-
-        difficulty = room.difficulty
-        timer = get_timer_for_difficulty(difficulty)
+        timer = room.bomb_timer
+        
         session = await self.get_or_create_session(room)
         syllable = generate_syllable()
 

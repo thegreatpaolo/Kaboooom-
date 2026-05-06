@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { kaboomLogo } from '../../assets/index'
 
 interface HomePageProps {
@@ -16,11 +16,18 @@ interface HomePageProps {
 export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [playerName, setPlayerName] = useState('');
-  const [roomCodeInput, setRoomCodeInput] = useState(''); // New state for Join Code
+  const [roomCodeInput, setRoomCodeInput] = useState('');
   const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy');
   const [minPlayers, setMinPlayers] = useState(2);
   const [maxPlayers, setMaxPlayers] = useState(8);
   const [timer, setTimer] = useState(30);
+
+  // Automatically set timer to 12s when Hard mode is selected
+  useEffect(() => {
+    if (difficulty === 'hard') {
+      setTimer(12);
+    }
+  }, [difficulty]);
 
   const handleCreateClick = () => {
     if (!playerName.trim()) return alert("Please enter your name");
@@ -38,8 +45,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
   const handleJoinClick = () => {
     if (!playerName.trim()) return alert("Please enter your name first");
     if (!roomCodeInput.trim()) return alert("Please enter a room code");
-    
-    // Call the parent function to join the specific room
     onJoinRoom(playerName, roomCodeInput.toUpperCase());
   };
 
@@ -54,7 +59,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
       </div>
 
       <div className="relative w-full max-w-md rounded-3xl p-8 bg-black/40 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
-        {/* Name Input - Shared by both tabs */}
         <div className="mb-6">
           <label className="block text-sm text-white font-bold mb-2">Your Name</label>
           <input
@@ -66,7 +70,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
           />
         </div>
 
-        {/* Tab Switcher */}
         <div className="flex gap-3 mb-6">
           <button 
             onClick={() => setActiveTab('create')} 
@@ -82,7 +85,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
           </button>
         </div>
 
-        {/* Create Room Content */}
         {activeTab === 'create' && (
           <>
             <div className="mb-6">
@@ -101,6 +103,30 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
                   Hard 
                 </button>
               </div>
+            </div>
+
+            {/* Timer Selection Section */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm text-white font-bold">Round Timer</label>
+                <span className={`font-black ${difficulty === 'hard' ? 'text-pink-500' : 'text-yellow-400'}`}>
+                  {timer}s
+                </span>
+              </div>
+              <input 
+                type="range" 
+                min="10" 
+                max="30" 
+                value={timer} 
+                disabled={difficulty === 'hard'} 
+                onChange={(e) => setTimer(Number(e.target.value))}
+                className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
+                  difficulty === 'hard' ? 'bg-pink-900 opacity-50' : 'bg-white/20'
+                }`}
+              />
+              {difficulty === 'hard' && (
+                <p className="text-[10px] text-pink-400 mt-2 italic">⚠️ Hard mode is locked at 12s!</p>
+              )}
             </div>
 
             <div className="mb-6">
@@ -126,7 +152,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
           </>
         )}
 
-        {/* Join Room Content */}
         {activeTab === 'join' && (
           <div className="animate-in fade-in zoom-in duration-300">
             <div className="mb-6">
@@ -147,9 +172,6 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
             >
               Join Room
             </button>
-            <p className="text-center text-xs text-white/40 mt-4 italic">
-              Ask your friend for the 4-character code!
-            </p>
           </div>
         )}
       </div>
