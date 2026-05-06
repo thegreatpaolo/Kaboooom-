@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import kaboomLogo from '../../assets/can_you_create_a_game_logo_for_kaboooom_-removebg-preview.png';
+import { kaboomLogo } from '../../assets/index'
 
 interface HomePageProps {
   onCreateRoom: (settings: { 
@@ -133,7 +133,7 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               <label className="block text-sm text-[#39FF14] font-bold mb-2">Enter Room Code</label>
               <input
                 type="text"
-                maxLength={4}
+                maxLength={6}
                 placeholder="EX: A1B2"
                 value={roomCodeInput}
                 onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}

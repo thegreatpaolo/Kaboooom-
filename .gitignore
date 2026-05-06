@@ -1,4 +1,12 @@
-node_modules/
 .next/
+# Python
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+*.env
+# Node
+node_modules/
 dist/
-.env
+# Wordlist (too large for git)
+game/wordlist.txt
