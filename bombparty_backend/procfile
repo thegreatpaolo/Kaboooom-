@@ -1,1 +1,1 @@
-web: python -m daphne -b 0.0.0.0 -p $PORT asgi:application
+web: python manage.py migrate && python -m daphne -b 0.0.0.0 -p $PORT asgi:application
