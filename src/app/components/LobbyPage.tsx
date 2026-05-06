@@ -20,7 +20,7 @@ export function LobbyPage({ roomCode, players, minPlayers, onStartGame, onLeaveR
   };
 
   const canStart = players.length >= minPlayers;
-  const isHost = players.find(p => p.isHost); // Identify if the current user is the host[cite: 4]
+  const isHost = players.find(p => p.isHost); // Identify if the current user is the host
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
@@ -76,7 +76,7 @@ export function LobbyPage({ roomCode, players, minPlayers, onStartGame, onLeaveR
             {canStart ? '🎮 Start Game' : `Waiting for players...`}
           </button>
 
-          {/* DEBUG BUTTON: Only visible to host when alone[cite: 4] */}
+          {/* DEBUG BUTTON: Only visible to host when alone */}
           {isHost && !canStart && (
             <button
               onClick={onStartGame}
