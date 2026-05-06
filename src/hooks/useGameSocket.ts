@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 
-const WS_BASE = 'ws://127.0.0.1:8000/ws/game'
+const WS_BASE = 'wss://kaboooom-backend.onrender.com/ws/game'
 
 export function useGameSocket(
   roomCode: string,
