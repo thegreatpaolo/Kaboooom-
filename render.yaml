@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: kaboooom-backend
+    runtime: python
+    rootDir: bombparty_backend
+    buildCommand: pip install -r requirements.txt && python manage.py migrate
+    startCommand: python -m daphne -b 0.0.0.0 -p $PORT asgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: settings
+      - key: PYTHON_VERSION
+        value: 3.11.0
