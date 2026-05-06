@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://kaboooom-backend.onrender.com/api'
+  baseURL: 'https://kaboooom.onrender.com/api'
 })
 
 export const createRoom = async (config: {
