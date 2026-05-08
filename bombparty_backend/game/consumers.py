@@ -8,23 +8,15 @@ from .game_logic import (
     calculate_score, get_timer_for_difficulty
 )
 
-# Global registry of active bomb timer tasks — one per room
-# This is the PDC parallel task demonstration
 active_bomb_tasks: dict[str, asyncio.Task] = {}
 
 
 class GameConsumer(AsyncWebsocketConsumer):
-    """
-    One instance of GameConsumer = one connected player = one async worker.
-    Django Channels spawns these concurrently — this is the parallel worker model.
-    All workers in the same room communicate via Redis channel groups (message passing).
-    """
 
     async def connect(self):
         self.room_code = self.scope['url_route']['kwargs']['room_code']
         self.room_group_name = f'game_{self.room_code}'
         self.player_id = None
-
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         print(f'[WORKER SPAWNED] Room={self.room_code} Channel={self.channel_name[:20]}')
@@ -53,8 +45,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         else:
             await self.send_error(f'Unknown event type: {data.get("type")}')
 
-    # ── Event handlers ────────────────────────────────────────────
-
     async def handle_join(self, data):
         name = data.get('name', 'Anonymous').strip()[:50]
         room = await self.get_room(self.room_code)
@@ -67,15 +57,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         player = await self.create_player(room, name, self.channel_name, is_host)
         self.player_id = player.id
 
-        # Confirm join to this player
         await self.send(text_data=json.dumps({
             'type': 'joined',
             'player_id': player.id,
             'is_host': is_host,
             'room_code': self.room_code,
         }))
-
-        # Broadcast updated player list to everyone in room
         await self.broadcast_players()
 
     async def handle_start_game(self, data):
@@ -83,8 +70,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         if not room:
             return
 
-        difficulty = room.difficulty
-        timer = get_timer_for_difficulty(difficulty)
+        custom_timer = await self.get_room_timer(room)
+        timer = get_timer_for_difficulty(room.difficulty, custom_timer)
         session = await self.get_or_create_session(room)
         syllable = generate_syllable()
 
@@ -106,11 +93,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             }
         })
 
-        # Cancel any leftover task from a previous round
         self._cancel_bomb(self.room_code)
-
-        # Launch the bomb timer as an independent async task
-        # This runs concurrently alongside all player workers — PDC in action
         active_bomb_tasks[self.room_code] = asyncio.create_task(
             self.run_bomb_timer(timer, session)
         )
@@ -129,7 +112,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         result = validate_word(word, session.current_syllable, session.used_words)
 
         if result['valid']:
-            # Player answered in time — cancel the bomb
             self._cancel_bomb(self.room_code)
 
             score_gained = calculate_score(word)
@@ -143,7 +125,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 player_index=next_index
             )
 
-            # Broadcast accepted word to all players
             await self.channel_layer.group_send(self.room_group_name, {
                 'type': 'game_event',
                 'payload': {
@@ -157,27 +138,17 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             })
 
-            # Restart the bomb for the next player
             active_bomb_tasks[self.room_code] = asyncio.create_task(
                 self.run_bomb_timer(session.bomb_timer, session)
             )
-
         else:
-            # Only send rejection to the player who submitted
             await self.send(text_data=json.dumps({
                 'type': 'word_rejected',
                 'word': word,
                 'reason': result['reason'],
             }))
 
-    # ── Bomb timer — the PDC parallel background task ─────────────
-
     async def run_bomb_timer(self, seconds: int, session):
-        """
-        Runs as an independent asyncio.Task — completely parallel to player workers.
-        Broadcasts a tick every second. If it reaches zero, the current player loses a life.
-        Getting cancelled (via _cancel_bomb) means a player answered in time.
-        """
         try:
             for remaining in range(seconds, 0, -1):
                 await self.channel_layer.group_send(self.room_group_name, {
@@ -189,7 +160,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 })
                 await asyncio.sleep(1)
 
-            # Zero reached — bomb explodes
             print(f'[BOMB EXPLODED] Room={self.room_code}')
             room = await self.get_room(self.room_code)
             if not room:
@@ -197,7 +167,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
             session = await self.get_session(room)
             players = await self.get_players(room)
-
             if not players:
                 return
 
@@ -214,11 +183,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             })
 
-            # Check if this player is eliminated
             if new_lives <= 0:
                 alive = await self.get_alive_players(room)
                 if len(alive) == 1:
-                    # Game over — last player standing wins
                     await self.channel_layer.group_send(self.room_group_name, {
                         'type': 'game_event',
                         'payload': {
@@ -230,11 +197,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                     })
                     await self.update_session(session, is_running=False)
                     return
-
                 if len(alive) == 0:
                     return
 
-            # Continue to next alive player
             next_index = await self.get_next_alive_index(room, session)
             next_syllable = generate_syllable()
             await self.update_session(session,
@@ -252,13 +217,11 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             })
 
-            # Restart bomb for next player
             active_bomb_tasks[self.room_code] = asyncio.create_task(
                 self.run_bomb_timer(session.bomb_timer, session)
             )
 
         except asyncio.CancelledError:
-            # Normal — player submitted a valid word in time
             pass
         except Exception as e:
             print(f'[BOMB ERROR] Room={self.room_code} Error={e}')
@@ -268,10 +231,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         if task and not task.done():
             task.cancel()
 
-    # ── Broadcaster ───────────────────────────────────────────────
-
     async def game_event(self, event):
-        """Called by channel layer to forward a group message to this WebSocket."""
         await self.send(text_data=json.dumps(event['payload']))
 
     async def broadcast_players(self):
@@ -281,19 +241,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         players = await self.get_players(room)
         await self.channel_layer.group_send(self.room_group_name, {
             'type': 'game_event',
-            'payload': {
-                'type': 'players_update',
-                'players': players,
-            }
+            'payload': {'type': 'players_update', 'players': players}
         })
 
     async def send_error(self, message: str):
         await self.send(text_data=json.dumps({
-            'type': 'error',
-            'message': message,
+            'type': 'error', 'message': message
         }))
-
-    # ── Database helpers (all wrapped in database_sync_to_async) ──
 
     @database_sync_to_async
     def get_room(self, code):
@@ -309,10 +263,8 @@ class GameConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def create_player(self, room, name, channel_name, is_host):
         return Player.objects.create(
-            room=room,
-            name=name,
-            channel_name=channel_name,
-            is_host=is_host,
+            room=room, name=name,
+            channel_name=channel_name, is_host=is_host,
         )
 
     @database_sync_to_async
@@ -380,3 +332,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         if alive_count == 0:
             return 0
         return (session.current_player_index + 1) % alive_count
+
+    @database_sync_to_async
+    def get_room_timer(self, room):
+        return room.custom_timer

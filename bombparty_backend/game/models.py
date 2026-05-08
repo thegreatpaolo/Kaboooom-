@@ -8,14 +8,12 @@ def generate_room_code():
 
 
 class Room(models.Model):
-    DIFFICULTY_CHOICES = [
-        ('easy', 'Easy'),
-        ('hard', 'Hard'),
-    ]
+    DIFFICULTY_CHOICES = [('easy', 'Easy'), ('hard', 'Hard')]
     code = models.CharField(max_length=6, unique=True, default=generate_room_code)
     difficulty = models.CharField(max_length=4, choices=DIFFICULTY_CHOICES, default='easy')
     min_players = models.IntegerField(default=2)
     max_players = models.IntegerField(default=8)
+    custom_timer = models.IntegerField(default=20)  # ← add this
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
