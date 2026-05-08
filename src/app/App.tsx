@@ -133,29 +133,30 @@ export default function App() {
   // ── Screen handlers ───────────────────────────────────────────
 
   const handleCreateRoom = async (settings: {
-    name: string
-    difficulty: 'easy' | 'hard'
-    minPlayers: number
-    maxPlayers: number
-    timer: number
-    code: string
-  }) => {
-    try {
-      // Call Django API to create room — ignore frontend generated code
-      const data = await createRoom({
-        difficulty: settings.difficulty,
-        min_players: settings.minPlayers,
-        max_players: settings.maxPlayers,
-      })
-      setPlayerName(settings.name)
-      setRoomCode(data.code)
-      setMinPlayers(settings.minPlayers)
-      setMaxTime(settings.timer)
-      setScreen('lobby')
-    } catch (err) {
-      alert('Failed to create room. Is the backend running?')
-    }
+  name: string
+  difficulty: 'easy' | 'hard'
+  minPlayers: number
+  maxPlayers: number
+  timer: number
+  code: string
+}) => {
+  try {
+    const data = await createRoom({
+      difficulty: settings.difficulty,
+      min_players: settings.minPlayers,
+      max_players: settings.maxPlayers,
+      timer: settings.timer,        
+    })
+    setPlayerName(settings.name)
+    setRoomCode(data.code)
+    setMinPlayers(settings.minPlayers)
+    setMaxTime(settings.timer)      
+    setTimeLeft(settings.timer)     
+    setScreen('lobby')
+  } catch (err) {
+    alert('Failed to create room. Is the backend running?')
   }
+}
 
   const handleJoinRoom = async (name: string, code: string) => {
     try {

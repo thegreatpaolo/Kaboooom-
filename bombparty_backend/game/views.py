@@ -9,20 +9,20 @@ def create_room(request):
     difficulty = request.data.get('difficulty', 'easy')
     min_players = request.data.get('min_players', 2)
     max_players = request.data.get('max_players', 8)
-    bomb_timer = request.data.get('bomb_timer', 20)
+    custom_timer = request.data.get('timer', 20)
 
     room = Room.objects.create(
         difficulty=difficulty,
         min_players=min_players,
         max_players=max_players,
-        bomb_timer=bomb_timer,
+        custom_timer=custom_timer,
     )
     return Response({
         'code': room.code,
         'difficulty': room.difficulty,
         'min_players': room.min_players,
         'max_players': room.max_players,
-        'bomb_timer': room.bomb_timer,
+        'custom_timer': room.custom_timer,
     }, status=status.HTTP_201_CREATED)
 
 

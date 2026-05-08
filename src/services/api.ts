@@ -8,7 +8,7 @@ export const createRoom = async (config: {
   difficulty: 'easy' | 'hard'
   min_players: number
   max_players: number
-  bomb_timer: number
+  timer: number       
 }) => {
   const res = await api.post('/rooms/create/', config)
   return res.data as { code: string }

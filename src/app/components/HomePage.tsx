@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { kaboomLogo } from '../../assets/index'
 
 interface HomePageProps {
@@ -20,14 +20,7 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
   const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy');
   const [minPlayers, setMinPlayers] = useState(2);
   const [maxPlayers, setMaxPlayers] = useState(8);
-  const [timer, setTimer] = useState(30);
-
-  // Automatically set timer to 12s when Hard mode is selected
-  useEffect(() => {
-    if (difficulty === 'hard') {
-      setTimer(12);
-    }
-  }, [difficulty]);
+  const [timer, setTimer] = useState(20);
 
   const handleCreateClick = () => {
     if (!playerName.trim()) return alert("Please enter your name");
@@ -59,6 +52,8 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
       </div>
 
       <div className="relative w-full max-w-md rounded-3xl p-8 bg-black/40 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
+        
+        {/* Name Input */}
         <div className="mb-6">
           <label className="block text-sm text-white font-bold mb-2">Your Name</label>
           <input
@@ -70,6 +65,7 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
           />
         </div>
 
+        {/* Tab Switcher */}
         <div className="flex gap-3 mb-6">
           <button 
             onClick={() => setActiveTab('create')} 
@@ -85,8 +81,10 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
           </button>
         </div>
 
+        {/* Create Room Content */}
         {activeTab === 'create' && (
           <>
+            {/* Difficulty */}
             <div className="mb-6">
               <label className="block text-sm text-white font-bold mb-3">Difficulty</label>
               <div className="flex gap-3">
@@ -94,64 +92,77 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
                   onClick={() => setDifficulty('easy')}
                   className={`flex-1 py-4 rounded-2xl font-bold border-b-4 transition-all ${difficulty === 'easy' ? 'bg-[#39FF14] text-black border-green-700 shadow-[0_0_20px_rgba(57,255,20,0.4)]' : 'bg-white/10 text-white border-white/20'}`}
                 >
-                  Easy 
+                  Easy
                 </button>
                 <button 
                   onClick={() => setDifficulty('hard')}
                   className={`flex-1 py-4 rounded-2xl font-bold border-b-4 transition-all ${difficulty === 'hard' ? 'bg-[#FF007F] text-white border-pink-900 shadow-[0_0_20px_rgba(255,0,127,0.4)]' : 'bg-white/10 text-white border-white/20'}`}
                 >
-                  Hard 
+                  Hard
                 </button>
               </div>
             </div>
 
-            {/* Timer Selection Section */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-sm text-white font-bold">Round Timer</label>
-                <span className={`font-black ${difficulty === 'hard' ? 'text-pink-500' : 'text-yellow-400'}`}>
-                  {timer}s
-                </span>
-              </div>
-              <input 
-                type="range" 
-                min="10" 
-                max="30" 
-                value={timer} 
-                disabled={difficulty === 'hard'} 
-                onChange={(e) => setTimer(Number(e.target.value))}
-                className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
-                  difficulty === 'hard' ? 'bg-pink-900 opacity-50' : 'bg-white/20'
-                }`}
-              />
-              {difficulty === 'hard' && (
-                <p className="text-[10px] text-pink-400 mt-2 italic">⚠️ Hard mode is locked at 12s!</p>
-              )}
-            </div>
-
+            {/* Min-Max Players */}
             <div className="mb-6">
               <label className="block text-sm text-white font-bold mb-3">Min-Max Players</label>
               <div className="flex gap-4">
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Min</span>
-                  <input type="number" min="2" max="8" value={minPlayers} onChange={(e) => setMinPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
+                  <input
+                    type="number"
+                    min="2"
+                    max="8"
+                    value={minPlayers}
+                    onChange={(e) => setMinPlayers(Number(e.target.value))}
+                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center"
+                  />
                 </div>
                 <div className="flex-1">
                   <span className="text-[10px] text-blue-200 block mb-1">Max</span>
-                  <input type="number" min="2" max="8" value={maxPlayers} onChange={(e) => setMaxPlayers(Number(e.target.value))} className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center" />
+                  <input
+                    type="number"
+                    min="2"
+                    max="8"
+                    value={maxPlayers}
+                    onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                    className="w-full bg-white/10 border-2 border-white/20 rounded-xl p-2 text-white text-center"
+                  />
                 </div>
               </div>
             </div>
 
+            {/* Bomb Timer Slider */}
+            <div className="mb-6">
+              <label className="block text-sm text-white font-bold mb-3">
+                Bomb Timer: <span className="text-yellow-400">{timer}s</span>
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="30"
+                value={timer}
+                onChange={(e) => setTimer(Number(e.target.value))}
+                className="w-full accent-yellow-400"
+              />
+              <div className="flex justify-between text-xs text-white/50 mt-1">
+                <span>1s</span>
+                <span>15s</span>
+                <span>30s</span>
+              </div>
+            </div>
+
+            {/* Create Button */}
             <button 
               onClick={handleCreateClick} 
               className="w-full bg-[#FFD700] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-yellow-700 active:transform active:scale-95 transition-transform"
             >
-               Create a Room
+              🎮 Create a Room
             </button>
           </>
         )}
 
+        {/* Join Room Content */}
         {activeTab === 'join' && (
           <div className="animate-in fade-in zoom-in duration-300">
             <div className="mb-6">
@@ -159,7 +170,7 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               <input
                 type="text"
                 maxLength={6}
-                placeholder="EX: A1B2"
+                placeholder="EX: ABCDEF"
                 value={roomCodeInput}
                 onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
                 className="w-full bg-white/10 border-2 border-[#39FF14]/50 rounded-2xl px-4 py-4 text-center text-3xl font-mono tracking-widest text-white outline-none focus:border-[#39FF14] shadow-[0_0_15px_rgba(57,255,20,0.2)]"
@@ -170,8 +181,11 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               onClick={handleJoinClick}
               className="w-full bg-[#39FF14] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-green-700 active:transform active:scale-95 transition-transform"
             >
-              Join Room
+              🚀 Join Room
             </button>
+            <p className="text-center text-xs text-white/40 mt-4 italic">
+              Ask your friend for the 6-character code!
+            </p>
           </div>
         )}
       </div>

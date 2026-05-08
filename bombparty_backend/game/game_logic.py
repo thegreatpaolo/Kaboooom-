@@ -69,9 +69,7 @@ def calculate_score(word: str) -> int:
     return length
 
 
-def get_timer_for_difficulty(difficulty: str) -> int:
-    """
-    Returns bomb timer in seconds based on difficulty.
-    Hard mode = less time = more pressure = more fun.
-    """
+def get_timer_for_difficulty(difficulty: str, custom_timer: int = None) -> int:
+    if custom_timer is not None:
+        return max(1, min(30, custom_timer))
     return 10 if difficulty == 'hard' else 20
