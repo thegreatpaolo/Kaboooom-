@@ -157,7 +157,7 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               onClick={handleCreateClick} 
               className="w-full bg-[#FFD700] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-yellow-700 active:transform active:scale-95 transition-transform"
             >
-               Create a Room
+              🎮 Create a Room
             </button>
           </>
         )}
@@ -181,7 +181,11 @@ export function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
               onClick={handleJoinClick}
               className="w-full bg-[#39FF14] text-black py-4 rounded-3xl font-bold text-2xl border-b-4 border-green-700 active:transform active:scale-95 transition-transform"
             >
+<<<<<<< HEAD
                Join Room
+=======
+              🚀 Join Room
+>>>>>>> 0e86952
             </button>
             <p className="text-center text-xs text-white/40 mt-4 italic">
               Ask your friend for the 6-character code!
